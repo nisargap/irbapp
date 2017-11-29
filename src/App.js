@@ -16,6 +16,22 @@ function getDifference(a, b)
     }
     return result;
 }
+function reverseString(str) {
+  // Step 1. Use the split() method to return a new array
+  var splitString = str.split(""); // var splitString = "hello".split("");
+  // ["h", "e", "l", "l", "o"]
+
+  // Step 2. Use the reverse() method to reverse the new created array
+  var reverseArray = splitString.reverse(); // var reverseArray = ["h", "e", "l", "l", "o"].reverse();
+  // ["o", "l", "l", "e", "h"]
+
+  // Step 3. Use the join() method to join all elements of the array into a string
+  var joinArray = reverseArray.join(""); // var joinArray = ["o", "l", "l", "e", "h"].join("");
+  // "olleh"
+  
+  //Step 4. Return the reversed string
+  return joinArray; // "olleh"
+}
 class App extends Component {
   constructor(props) {
     super(props);
@@ -38,7 +54,8 @@ class App extends Component {
       finished: false,
       chatHistory: [],
       timerPause: false,
-      experimentEntered: false
+      experimentEntered: false,
+      reverse: false
     }
     //console.log(images)
   }
@@ -47,8 +64,9 @@ class App extends Component {
       answers: "",
       textInput: "",
       timer: "",
-      currentImage: [require("./images/questions/1.png")],
+      currentImage: [require("./images/questions/40.png")],
       finished: false,
+      reverse: true,
       count: 1
     });
     this.resetTimer();
@@ -90,7 +108,7 @@ class App extends Component {
             resetTimer: false
           });
         }
-        if (minutes === 14 && !this.state.experimentDone && !this.state.experimentEntered) {
+        if (minutes === 7 && !this.state.experimentDone && !this.state.experimentEntered) {
           if(this.state.showChatBox != "block") {
             this.setState({
               showChatBox: "block",
@@ -137,7 +155,7 @@ class App extends Component {
     }, 1000);
   }
   initSockets() {
-    this.wsConn = new WebSocket("ws://localhost:3030/v1/ws");
+    this.wsConn = new WebSocket("ws://nisarga.io:3030/v1/ws");
     this.wsConn.onmessage = (e) => {
       let chatHistory = this.state.chatHistory;
       let chatObj = JSON.parse(e.data);
@@ -183,7 +201,7 @@ class App extends Component {
   }
   incrementQuestion() {
     // alert("Submitted answer for question #" + this.state.count)
-    if (this.state.count + 1 <= 40 && this.validInput(this.state.textInput)) {
+    if (this.state.count + 1 <= 40 && this.validInput(this.state.textInput) && !this.state.reverse) {
     let next = this.state.count + 1;
     let images = []
     if (this.state.questions.includes(next)) {
@@ -197,6 +215,33 @@ class App extends Component {
       currentImage: images,
       answers: this.state.answers + this.state.textInput
     })
+    }
+
+    if (this.state.reverse) {
+      let next = 40 - this.state.count;
+      if (next === 0) {
+        let differences = getDifference(reverseString(this.answers), this.state.answers);
+        let correct = this.state.answers.length - differences;
+        alert("You answered " + correct + " questions correct out of " + this.state.answers.length + " answered");
+        this.setState({
+          finished: true
+        })
+      }
+      let images = []
+      if (this.state.questions.includes(next) && next != 0) {
+        images = [require("./images/questions/" + next + "a.png"), require("./images/questions/" + next + "b.png")]
+      } else if (next != 0) {
+        images = [require("./images/questions/" + next + ".png")]
+      } else {
+        alert("Finished");
+      }
+      this.setState({
+        count: this.state.count + 1,
+        textInput: "",
+        currentImage: images,
+        answers: this.state.answers + this.state.textInput
+      })
+
     }
 
     if (this.state.count + 1 > 40){
@@ -306,7 +351,7 @@ class App extends Component {
             !! DO NOT REFRESH PAGE !!
           </div>
           <div className="math-question" style={{ display: this.state.showMain }}>
-            <h3>Question #{this.state.count} - Time Left: <span style={{ color: "red"}}>{this.state.timer}</span></h3>
+            <h3>Question #{this.state.reverse ? 41 - this.state.count : this.state.count} - Time Left: <span style={{ color: "red"}}>{this.state.timer}</span></h3>
             <div className="math-question-container">
               {this.state.currentImage.length === 1 ? (<img src={this.state.currentImage[0]} alt="currentQuestion" />) : (
                 <div>
