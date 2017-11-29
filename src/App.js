@@ -222,7 +222,7 @@ class App extends Component {
       if (next === 0) {
         let differences = getDifference(reverseString(this.answers), this.state.answers);
         let correct = this.state.answers.length - differences;
-        alert("You answered " + correct + " questions correct out of " + this.state.answers.length + " answered");
+        alert("You answered " + correct + " questions correct out of " + this.state.answers.length + 1 + " answered");
         this.setState({
           finished: true
         })
@@ -233,7 +233,8 @@ class App extends Component {
       } else if (next != 0) {
         images = [require("./images/questions/" + next + ".png")]
       } else {
-        alert("Finished");
+        alert("Exam finished. Thank you! Page will now reload...");
+        window.location.reload(false); 
       }
       this.setState({
         count: this.state.count + 1,
@@ -244,13 +245,15 @@ class App extends Component {
 
     }
 
-    if (this.state.count + 1 > 40){
+    if (this.state.count + 1 > 40 && !this.state.reverse){
       let differences = getDifference(this.answers, this.state.answers);
       let correct = this.state.answers.length - differences;
-      alert("You answered " + correct + " questions correct out of " + this.state.answers.length + " answered");
+      alert("You answered " + correct + " questions correct out of " + this.state.answers.length + 1 + " answered");
       this.setState({
         finished: true
       })
+      alert("Exam finished. Thank you! Page will now reload...");
+      window.location.reload(false); 
     }
   }
   changeText(event) {
